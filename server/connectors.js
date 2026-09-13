@@ -20,8 +20,8 @@ export async function createGitHubIssue({ title, body, idempotencyKey }) {
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
   const data = await api(`https://api.github.com/repos/${owner}/${repo}/issues`, {
     method: 'POST',
-    headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${process.env.GITHUB_TOKEN}`, 'X-GitHub-Api-Version': '2022-11-28', 'Content-Type': 'application/json' },
-    body: JSON.stringify({ title, body: `${body}\n\n<!-- RevenueRescue operation: ${idempotencyKey} -->`, labels: ['revenue-rescue'] })
+    headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${process.env.GITHUB_TOKEN}`, 'X-GitHub-Api-Version': '2026-03-10', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title, body: `${body}\n\n<!-- RevenueRescue operation: ${idempotencyKey} -->` })
   });
   return { connector: 'github', id: String(data.number), url: data.html_url, idempotencyKey };
 }

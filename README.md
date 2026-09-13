@@ -133,6 +133,25 @@ type Connector = {
 
 This makes the reliability behavior portable across each external app: collect evidence, execute a guarded action with an idempotency key, then re-read the external system to verify completion.
 
+### Live connector mode
+
+The repository also contains a Node/Express connector service for real API execution. It includes adapters for GitHub Issues, Slack, Gmail, Google Calendar, and HubSpot. Live writes are disabled by default.
+
+1. Copy `.env.example` to `.env` and supply **test-workspace** credentials only.
+2. Use a GitHub token with `Issues: write`, a Slack bot token, Google OAuth access token with Gmail send and Calendar event scopes, and a HubSpot private-app token with company read/write scopes.
+3. Create the custom HubSpot company property `revenuerescue_last_plan` before enabling the HubSpot update.
+4. Build and start the server:
+
+   ```bash
+   npm run build
+   npm start
+   ```
+
+5. Confirm configuration at `GET /api/integrations`. It reports only whether each connector is configured, never credentials.
+6. Set `ENABLE_LIVE_WRITES=true` only after every credential is pointed at a test workspace. The `POST /api/recovery/execute` route otherwise rejects execution with HTTP 403.
+
+The live endpoint refuses to claim success when any connector fails or post-write verification fails.
+
 ## Demo video script
 
 The submission video should show this exact sequence in under two minutes:

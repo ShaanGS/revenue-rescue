@@ -1,7 +1,8 @@
 import 'dotenv/config';
 import express from 'express';
 import { integrationStatus } from './connectors.js';
-import { planRecovery } from '../src/agent.js';
+import { createLiveConnectors } from './live-connectors.js';
+import { executeRecovery, planRecovery } from '../src/agent.js';
 
 const app = express();
 app.use(express.json());
@@ -15,6 +16,15 @@ const demoAccount = {
 app.get('/api/health', (_request, response) => response.json({ ok: true }));
 app.get('/api/integrations', (_request, response) => response.json(integrationStatus()));
 app.post('/api/recovery/plan', (request, response) => response.json(planRecovery({ ...demoAccount, ...request.body })));
+app.post('/api/recovery/execute', async (request, response) => {
+  if (process.env.ENABLE_LIVE_WRITES !== 'true') return response.status(403).json({ error: 'Live writes are disabled. Set ENABLE_LIVE_WRITES=true only for a test workspace.' });
+  const plan = planRecovery({ ...demoAccount, ...request.body.account }, request.body.runId);
+  try {
+    response.json(await executeRecovery(plan, createLiveConnectors(plan.account), { approved: request.body.approved === true }));
+  } catch (error) {
+    response.status(502).json({ error: 'Connector execution failed; workflow stopped before claiming completion.', detail: error.message });
+  }
+});
 app.use(express.static('dist'));
 app.get('/{*splat}', (_request, response) => response.sendFile('index.html', { root: 'dist' }));
 
