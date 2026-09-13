@@ -1,0 +1,7 @@
+[
+  {"id":"support-root-cause","account":{"arr":18000,"renewalDays":12,"usageChange":-62,"failedPayment":true,"unresolvedTickets":2,"doNotContact":false,"openLegalEscalation":false},"expected":{"route":"support","blocked":false,"approval":true}},
+  {"id":"billing-root-cause","account":{"arr":4000,"renewalDays":21,"usageChange":-8,"failedPayment":true,"unresolvedTickets":0,"doNotContact":false,"openLegalEscalation":false},"expected":{"route":"billing","blocked":false,"approval":false}},
+  {"id":"adoption-root-cause","account":{"arr":6000,"renewalDays":45,"usageChange":-48,"failedPayment":false,"unresolvedTickets":0,"doNotContact":false,"openLegalEscalation":false},"expected":{"route":"adoption","blocked":false,"approval":false}},
+  {"id":"do-not-contact","account":{"arr":56000,"renewalDays":18,"usageChange":-41,"failedPayment":false,"unresolvedTickets":3,"doNotContact":true,"openLegalEscalation":false},"expected":{"route":"support","blocked":true,"approval":false}},
+  {"id":"legal-escalation","account":{"arr":24000,"renewalDays":9,"usageChange":-70,"failedPayment":true,"unresolvedTickets":5,"doNotContact":false,"openLegalEscalation":true},"expected":{"route":"support","blocked":true,"approval":false}}
+]

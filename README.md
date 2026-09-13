@@ -116,6 +116,8 @@ Current test coverage validates:
 7. retrying the same plan does not create duplicate connector writes.
 8. a verified external-action receipt persists across server restarts in the local audit ledger.
 
+The `evals/recovery-scenarios.json` pack adds replayable economic scenarios for support-root-cause, billing-root-cause, adoption-root-cause, do-not-contact, and legal-escalation decisions. Run it with the rest of the suite using `npm test`.
+
 Build the production bundle:
 
 ```bash
