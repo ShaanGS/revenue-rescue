@@ -1,44 +1,123 @@
 # RevenueRescue
 
-> An evidence-backed revenue-operations agent that turns churn signals into verified recovery work.
+> An evidence-backed AI revenue-operations agent that turns scattered churn signals into verified recovery work.
 
-RevenueRescue detects a high-value account at risk by joining signals from customer relationship management, billing, support, and product analytics systems. It chooses an appropriate recovery route, enforces outbound-action policy, requests approval when required, executes cross-app recovery actions, and verifies the resulting records.
+**[Watch the 2-minute demo](REPLACE_WITH_DEMO_VIDEO_URL)** · **[Open the live demo](REPLACE_WITH_LIVE_DEMO_URL)**
 
-## Demo flow
+> Before submission: replace the two links above with the uploaded video and deployed app URLs. The product can also be run locally using the instructions below.
 
-The seeded Acme Analytics scenario shows an $18,000 ARR account with a renewal in 12 days, a failed payment, two unresolved support tickets, and a 62% usage decline.
+## The problem
 
-1. The agent assembles evidence from HubSpot, Stripe, Intercom, and PostHog.
-2. It prioritizes a support recovery route because unresolved support issues best explain the adoption decline.
-3. It requires approval before external outreach to an enterprise account.
-4. Following approval, it creates/updates work across Linear, Slack, Gmail, Google Calendar, and HubSpot.
-5. It displays a receipt only after every write is verified.
-6. The “protected-account test” demonstrates that a do-not-contact label prevents all external actions.
+Revenue teams lose customers not because they have no data, but because the warning signs live in separate tools. A Customer Success Manager has to manually connect CRM context, a failed payment, unresolved support issues, and falling product usage; decide who should act; create work; contact the customer; and verify that nothing fell through.
 
-## Reliability principles
+That work is slow, repetitive, and easy to miss when a renewal is days away.
 
-- **Evidence-first:** action proposals retain the source facts that supported them.
-- **Policy-gated:** protected accounts are blocked; enterprise outreach requires approval.
-- **Idempotent:** each planned write carries an operation key, preventing duplicates on retry.
-- **Verified:** a completed action means the destination record was re-read successfully, not merely that an API request returned.
-- **Fail closed:** unavailable connector evidence prevents the agent from claiming completion.
+## What RevenueRescue does
 
-## Run locally
+RevenueRescue investigates an at-risk account, explains its decision from source evidence, creates a recovery plan, asks for approval when appropriate, performs the cross-app work, and verifies every write.
+
+### Demo scenario
+
+**Acme Analytics** has **$18,000 ARR** renewing in **12 days**. The agent finds:
+
+- a failed $1,500 Stripe invoice;
+- two unresolved Intercom support tickets about a login problem;
+- a 62% drop in weekly active seats in PostHog; and
+- the account owner and renewal context in HubSpot.
+
+It correctly chooses a **support recovery** route: resolve the problem causing the usage drop before sending sales outreach. After one approval, it creates and verifies the recovery work across connected apps.
+
+## Connected apps
+
+The prototype models the exact read/write interactions below through sandbox connector adapters, using seeded data so the demo and tests are deterministic. Production OAuth/API credentials are intentionally not committed to the repository.
+
+| App | What RevenueRescue reads or writes | Role in the recovery workflow |
+| --- | --- | --- |
+| HubSpot | Account value, renewal date, owner; recovery-plan update | Customer and renewal context |
+| Stripe | Failed invoice and outstanding balance | Billing risk signal |
+| Intercom | Unresolved tickets and customer issue context | Support risk signal |
+| PostHog | Product usage trend | Adoption risk signal |
+| Linear | Creates a P1 issue | Assigns the fix to engineering/support |
+| Slack | Posts an evidence-backed escalation | Coordinates the internal owners |
+| Gmail | Sends approved, truthful customer communication | Customer recovery outreach |
+| Google Calendar | Creates a recovery-call hold | Ensures follow-up happens |
+
+## How to use it
+
+### Run locally
 
 ```bash
 npm install
 npm run dev
 ```
 
-Run the small deterministic policy suite:
+Open the local URL printed by Vite (normally `http://localhost:5173`).
+
+### Run the Acme recovery workflow
+
+1. Review Acme’s account summary and evidence from the four source systems.
+2. Review the recovery route chosen by the agent and the reason it chose it.
+3. Click **Approve recovery plan**. This models the required human approval for high-value outbound communication.
+4. Click **Execute & verify 5 actions**.
+5. Review the verified receipt: a Linear issue, Slack alert, Gmail message, Calendar hold, and HubSpot update are each marked complete only after verification.
+6. Click **Show protected-account test** to load an account with a do-not-contact flag. RevenueRescue must stop without creating any external action.
+
+## How the agent works
+
+```text
+HubSpot + Stripe + Intercom + PostHog
+                 ↓
+       Evidence-backed risk assessment
+                 ↓
+       Policy and approval checks
+                 ↓
+ Linear + Slack + Gmail + Calendar + HubSpot
+                 ↓
+        Re-read and verify every action
+```
+
+The route is deliberately not a fixed Zap. For example:
+
+- An unresolved support issue takes priority when it plausibly explains the usage drop.
+- A failed payment with otherwise healthy usage uses the billing-recovery route.
+- A do-not-contact or legal-escalation flag blocks autonomous work.
+- Enterprise outreach requires approval before an external message is sent.
+
+## Reliability and evaluation
+
+For an agent that communicates externally, a successful API call is not enough. RevenueRescue is designed around measurable safety properties.
+
+| Reliability property | Implementation | How it is evaluated |
+| --- | --- | --- |
+| Evidence-backed decisions | Every recovery route is tied to account, billing, ticket, and usage evidence. | Acme must select the support route because open tickets explain the 62% usage decline. |
+| Policy compliance | Do-not-contact and legal-escalation accounts are blocked. | Protected-account scenario must create zero messages, meetings, or tasks. |
+| Human control | High-value/enterprise outreach pauses for approval. | Acme cannot execute the plan until the approval button is used. |
+| Correct prioritization | A deterministic route policy selects support, billing, or adoption recovery. | Policy test verifies support wins when unresolved tickets exist. |
+| Idempotency | Production writes use one operation key per account/action/run. | A retry cannot create duplicate tasks, messages, or meetings. |
+| Verified completion | Each connector action is re-read after execution. | A receipt is shown only after every destination record verifies. |
+| Fail closed | Missing evidence or failed verification prevents a false “completed” claim. | Production connector contract requires a successful `verify` response. |
+
+Run the automated reliability tests:
 
 ```bash
 npm test
 ```
 
-## Production connector contract
+Current test coverage validates:
 
-The demo currently runs against seeded connector data so it is reproducible. A production connector implements:
+1. protected accounts are blocked;
+2. enterprise outreach requires approval; and
+3. unresolved support issues select the support-recovery route.
+
+Build the production bundle:
+
+```bash
+npm run build
+```
+
+## Technical design
+
+The UI uses Vite and vanilla JavaScript to keep the demo fast and reproducible. Connector boundaries are designed around three operations:
 
 ```ts
 type Connector = {
@@ -48,20 +127,20 @@ type Connector = {
 };
 ```
 
-Required integrations: HubSpot, Stripe, Intercom, PostHog, Linear, Slack, Gmail, and Google Calendar. No API credentials are stored in this repository.
+This makes the reliability behavior portable across each external app: collect evidence, execute a guarded action with an idempotency key, then re-read the external system to verify completion.
 
-## Two-minute video beat sheet
+## Demo video script
 
-0:00–0:12 — State the $18k renewal risk.
+The submission video should show this exact sequence in under two minutes:
 
-0:12–0:32 — Show four source systems and the evidence assembled.
+1. **0:00–0:12** — Introduce the $18k renewal risk and the fragmented signals.
+2. **0:12–0:32** — Show evidence being joined from four source apps.
+3. **0:32–0:50** — Explain the selected route and approval gate.
+4. **0:50–1:25** — Approve and execute the five cross-app actions.
+5. **1:25–1:43** — Show the verified receipt.
+6. **1:43–1:55** — Run the protected-account test: the agent refuses to act.
+7. **1:55–2:00** — Close: “RevenueRescue turns churn signals into verified recovery work before revenue disappears.”
 
-0:32–0:50 — Explain why support recovery is selected and why approval is required.
+## Privacy and credentials
 
-0:50–1:25 — Approve, execute, and show five verified cross-app writes.
-
-1:25–1:43 — Show the resulting receipt.
-
-1:43–1:55 — Switch to the protected account and show that the agent refuses to act.
-
-1:55–2:00 — Close: “RevenueRescue turns churn signals into verified recovery work before revenue disappears.”
+No API keys, customer data, or OAuth credentials are committed to this repository. The included scenario is synthetic. In production, RevenueRescue should request the minimum OAuth scopes required per connector and preserve action receipts for auditability.
