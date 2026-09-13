@@ -114,6 +114,7 @@ Current test coverage validates:
 5. five recovery writes execute and verify after approval;
 6. the run fails closed when a connector cannot verify its write; and
 7. retrying the same plan does not create duplicate connector writes.
+8. a verified external-action receipt persists across server restarts in the local audit ledger.
 
 Build the production bundle:
 
@@ -153,6 +154,8 @@ The repository also contains a Node/Express connector service for real API execu
 6. Set `ENABLE_LIVE_WRITES=true` only after every credential is pointed at a test workspace. The `POST /api/recovery/execute` route otherwise rejects execution with HTTP 403.
 
 The live endpoint refuses to claim success when any connector fails or post-write verification fails.
+
+Every live action is first recorded in `.revenuerescue/operations.json` (which is ignored by Git). If a process stops while an external write is uncertain, RevenueRescue blocks a retry and requires verification instead of risking a duplicate email, issue, message, or meeting.
 
 ## Demo video script
 
