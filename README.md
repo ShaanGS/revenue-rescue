@@ -107,7 +107,11 @@ Current test coverage validates:
 
 1. protected accounts are blocked;
 2. enterprise outreach requires approval; and
-3. unresolved support issues select the support-recovery route.
+3. unresolved support issues select the support-recovery route;
+4. no enterprise work is performed before approval;
+5. five recovery writes execute and verify after approval;
+6. the run fails closed when a connector cannot verify its write; and
+7. retrying the same plan does not create duplicate connector writes.
 
 Build the production bundle:
 
@@ -117,7 +121,7 @@ npm run build
 
 ## Technical design
 
-The UI uses Vite and vanilla JavaScript to keep the demo fast and reproducible. Connector boundaries are designed around three operations:
+The UI uses Vite and vanilla JavaScript to keep the demo fast and reproducible. The agent core is an executable orchestration layer with deterministic in-memory connectors for the demo and tests. Connector boundaries are designed around three operations:
 
 ```ts
 type Connector = {
