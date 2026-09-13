@@ -59,8 +59,10 @@ Open the local URL printed by Vite (normally `http://localhost:5173`).
 2. Review the recovery route chosen by the agent and the reason it chose it.
 3. Click **Approve recovery plan**. This models the required human approval for high-value outbound communication.
 4. Click **Execute & verify 5 actions**.
-5. Review the verified receipt: a Linear issue, Slack alert, Gmail message, Calendar hold, and HubSpot update are each marked complete only after verification.
+5. Review the verified receipt: a GitHub issue, Slack alert, Gmail message, Calendar hold, and HubSpot update are each marked complete only after verification.
 6. Click **Show protected-account test** to load an account with a do-not-contact flag. RevenueRescue must stop without creating any external action.
+
+The interface reports whether it is in **Sandbox connectors online** mode or how many of the five live connectors are configured. It automatically uses live execution only when every required test connector is configured; otherwise the reproducible sandbox path is used.
 
 ## How the agent works
 
