@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import { integrationStatus } from './connectors.js';
 import { createLiveConnectors } from './live-connectors.js';
+import { reasonAboutRecovery } from './recovery-agent.js';
 import { executeRecovery, planRecovery } from '../src/agent.js';
 
 const app = express();
@@ -16,6 +17,15 @@ const demoAccount = {
 app.get('/api/health', (_request, response) => response.json({ ok: true }));
 app.get('/api/integrations', (_request, response) => response.json(integrationStatus()));
 app.post('/api/recovery/plan', (request, response) => response.json(planRecovery({ ...demoAccount, ...request.body })));
+app.post('/api/agent/reason', async (request, response) => {
+  const account = { ...demoAccount, ...request.body.account };
+  const evidence = request.body.evidence ?? [
+    'HubSpot: renewal in 12 days; ARR is $18,000', 'Stripe: latest invoice failed',
+    'Intercom: two unresolved login tickets', 'PostHog: weekly active seats decreased 62%'
+  ];
+  try { response.json(await reasonAboutRecovery(account, evidence)); }
+  catch (error) { response.status(process.env.OPENAI_API_KEY ? 502 : 503).json({ error: error.message }); }
+});
 app.post('/api/recovery/execute', async (request, response) => {
   if (process.env.ENABLE_LIVE_WRITES !== 'true') return response.status(403).json({ error: 'Live writes are disabled. Set ENABLE_LIVE_WRITES=true only for a test workspace.' });
   const plan = planRecovery({ ...demoAccount, ...request.body.account }, request.body.runId);

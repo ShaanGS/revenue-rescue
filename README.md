@@ -136,6 +136,10 @@ type Connector = {
 
 This makes the reliability behavior portable across each external app: collect evidence, execute a guarded action with an idempotency key, then re-read the external system to verify completion.
 
+### Real model reasoning
+
+`POST /api/agent/reason` invokes the OpenAI Responses API with a strict JSON schema. The model receives the gathered account evidence and must return a causal hypothesis, confidence, alternatives rejected, recovery route, and a proposed action bundle. It has no direct credentials or write access: the policy and approval layer validates its proposal before the connector executor can run it. The endpoint deliberately returns `503` when `OPENAI_API_KEY` is absent rather than pretending a deterministic fallback is model reasoning.
+
 ### Live connector mode
 
 The repository also contains a Node/Express connector service for real API execution. It includes adapters for GitHub Issues, Slack, Gmail, Google Calendar, and HubSpot. Live writes are disabled by default.
