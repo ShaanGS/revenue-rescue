@@ -31,8 +31,8 @@ function render() {
   const route = chooseRecoveryRoute(activeAccount);
   const app = document.querySelector('#app');
   const actions = route === 'support'
-    ? ['Create a P1 Linear issue for the login failure', 'Alert the CSM and Support Lead in Slack', 'Draft a truthful support update for approval', 'Create a recovery-call calendar hold', 'Update account recovery plan in HubSpot']
-    : ['Open billing recovery task', 'Alert account owner in Slack', 'Draft payment-recovery email', 'Create follow-up calendar hold', 'Update account recovery plan in HubSpot'];
+    ? ['Create a P1 GitHub issue for the login failure', 'Alert the CSM and Support Lead in Slack', 'Draft a truthful support update for approval', 'Create a recovery-call calendar hold', 'Update account recovery plan in HubSpot']
+    : ['Open billing recovery GitHub issue', 'Alert account owner in Slack', 'Draft payment-recovery email', 'Create follow-up calendar hold', 'Update account recovery plan in HubSpot'];
 
   app.innerHTML = `
     <main>
@@ -65,7 +65,7 @@ function render() {
           <ol>${actions.map((action, index) => `<li class="${executed ? 'done' : ''}"><span>${executed ? '✓' : index + 1}</span>${action}<small>${executed ? 'Verified' : 'Queued'}</small></li>`).join('')}</ol>
           <div class="actions">${!approved ? '<button id="approve">Approve recovery plan</button>' : !executed ? '<button id="execute">Execute & verify 5 actions</button>' : '<button disabled>Recovery workflow verified ✓</button>'}<span>${approved ? 'No duplicate actions on re-run.' : 'No external action has been taken.'}</span></div>`}
       </section>
-      ${executed ? `<section class="receipt"><div><p class="eyebrow">VERIFIED RECEIPT</p><h2>Five actions completed.<br><em>Five receipts attached.</em></h2></div><div class="receipt-list"><p>Linear <b>RR-184 created</b></p><p>Slack <b>#acme-recovery notified</b></p><p>Gmail <b>draft approved & sent</b></p><p>Calendar <b>recovery hold created</b></p><p>HubSpot <b>recovery plan updated</b></p></div></section>` : ''}
+      ${executed ? `<section class="receipt"><div><p class="eyebrow">VERIFIED RECEIPT</p><h2>Five actions completed.<br><em>Five receipts attached.</em></h2></div><div class="receipt-list"><p>GitHub <b>issue created</b></p><p>Slack <b>#acme-recovery notified</b></p><p>Gmail <b>draft approved & sent</b></p><p>Calendar <b>recovery hold created</b></p><p>HubSpot <b>recovery plan updated</b></p></div></section>` : ''}
       <footer>RevenueRescue · Evidence-backed, approval-gated, idempotent recovery operations</footer>
     </main>`;
 

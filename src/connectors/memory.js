@@ -23,5 +23,5 @@ export function createMemoryConnector(name, { failVerificationFor } = {}) {
 }
 
 export function createDemoConnectors(options = {}) {
-  return Object.fromEntries(['linear', 'slack', 'gmail', 'calendar', 'hubspot'].map((name) => [name, createMemoryConnector(name, options[name])])) ;
+  return Object.fromEntries(['github', 'slack', 'gmail', 'calendar', 'hubspot'].map((name) => [name, createMemoryConnector(name, options[name])]));
 }

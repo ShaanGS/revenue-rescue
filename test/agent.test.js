@@ -39,6 +39,6 @@ test('idempotency key prevents duplicate writes on retry', async () => {
   const plan = planRecovery(acme, 'same-run');
   await executeRecovery(plan, connectors, { approved: true });
   await executeRecovery(plan, connectors, { approved: true });
-  assert.equal(connectors.linear.writes.size, 1);
+  assert.equal(connectors.github.writes.size, 1);
   assert.equal(connectors.slack.writes.size, 1);
 });

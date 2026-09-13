@@ -37,7 +37,7 @@ The prototype models the exact read/write interactions below through sandbox con
 | Stripe | Failed invoice and outstanding balance | Billing risk signal |
 | Intercom | Unresolved tickets and customer issue context | Support risk signal |
 | PostHog | Product usage trend | Adoption risk signal |
-| Linear | Creates a P1 issue | Assigns the fix to engineering/support |
+| GitHub | Creates a P1 issue | Assigns the fix to engineering/support |
 | Slack | Posts an evidence-backed escalation | Coordinates the internal owners |
 | Gmail | Sends approved, truthful customer communication | Customer recovery outreach |
 | Google Calendar | Creates a recovery-call hold | Ensures follow-up happens |
@@ -71,7 +71,7 @@ HubSpot + Stripe + Intercom + PostHog
                  ↓
        Policy and approval checks
                  ↓
- Linear + Slack + Gmail + Calendar + HubSpot
+ GitHub + Slack + Gmail + Calendar + HubSpot
                  ↓
         Re-read and verify every action
 ```
@@ -141,7 +141,7 @@ The submission video should show this exact sequence in under two minutes:
 2. **0:12–0:32** — Show evidence being joined from four source apps.
 3. **0:32–0:50** — Explain the selected route and approval gate.
 4. **0:50–1:25** — Approve and execute the five cross-app actions.
-5. **1:25–1:43** — Show the verified receipt.
+5. **1:25–1:43** — Show the verified receipt across GitHub, Slack, Gmail, Calendar, and HubSpot.
 6. **1:43–1:55** — Run the protected-account test: the agent refuses to act.
 7. **1:55–2:00** — Close: “RevenueRescue turns churn signals into verified recovery work before revenue disappears.”
 

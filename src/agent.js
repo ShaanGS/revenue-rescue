@@ -2,21 +2,21 @@ import { chooseRecoveryRoute, evaluatePolicy } from './policy.js';
 
 const actionsByRoute = {
   support: [
-    { connector: 'linear', type: 'create_issue', label: 'Create a P1 issue for the login failure' },
+    { connector: 'github', type: 'create_issue', label: 'Create a P1 issue for the login failure' },
     { connector: 'slack', type: 'post_escalation', label: 'Alert the CSM and Support Lead in Slack' },
     { connector: 'gmail', type: 'send_customer_update', label: 'Send an approved, truthful support update' },
     { connector: 'calendar', type: 'create_recovery_hold', label: 'Create a recovery-call calendar hold' },
     { connector: 'hubspot', type: 'update_recovery_plan', label: 'Update account recovery plan in HubSpot' }
   ],
   billing: [
-    { connector: 'linear', type: 'create_billing_task', label: 'Create a billing recovery task' },
+    { connector: 'github', type: 'create_billing_task', label: 'Create a billing recovery task' },
     { connector: 'slack', type: 'post_escalation', label: 'Alert the account owner in Slack' },
     { connector: 'gmail', type: 'send_payment_update', label: 'Send an approved payment recovery update' },
     { connector: 'calendar', type: 'create_recovery_hold', label: 'Create a billing follow-up hold' },
     { connector: 'hubspot', type: 'update_recovery_plan', label: 'Update account recovery plan in HubSpot' }
   ],
   adoption: [
-    { connector: 'linear', type: 'create_adoption_task', label: 'Create an adoption recovery task' },
+    { connector: 'github', type: 'create_adoption_task', label: 'Create an adoption recovery task' },
     { connector: 'slack', type: 'post_escalation', label: 'Alert the account owner in Slack' },
     { connector: 'gmail', type: 'send_adoption_update', label: 'Send an approved adoption recovery update' },
     { connector: 'calendar', type: 'create_recovery_hold', label: 'Create a success-call calendar hold' },
