@@ -23,6 +23,8 @@ let executing = false;
 let executionError = '';
 let integrations = null;
 let receipts = [];
+let investigated = false;
+let investigating = false;
 
 const evidence = [
   ['HubSpot', 'Renewal in 12 days · $18,000 ARR · owner: Maya Chen'],
@@ -76,6 +78,15 @@ async function runRecovery() {
   }
 }
 
+async function investigateAccount() {
+  investigating = true;
+  render();
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  investigating = false;
+  investigated = true;
+  render();
+}
+
 function render() {
   const policy = evaluatePolicy(activeAccount);
   const route = chooseRecoveryRoute(activeAccount);
@@ -89,6 +100,16 @@ function render() {
     const detail = receipt.url ? `<a href="${receipt.url}" target="_blank" rel="noreferrer">Open receipt ↗</a>` : `Verified · ${reference}`;
     return `<p><span>${label}</span><b>${detail}</b></p>`;
   }).join('');
+  const agentState = executed ? 'Recovery verified' : executing ? 'Executing approved plan' : activeAccount.doNotContact ? 'Blocked by policy' : approved ? 'Ready to execute' : investigated ? 'Awaiting approval' : 'Ready to investigate';
+  const agentReply = activeAccount.doNotContact
+    ? 'I found a do-not-contact policy. I stopped before creating any external work.'
+    : executed
+      ? 'Recovery work is complete. I re-read each destination and attached five verified receipts.'
+      : approved
+        ? 'Approval recorded. I am ready to coordinate the recovery across five tools.'
+        : investigated
+          ? 'I found a failed invoice, two unresolved login tickets, and a 62% usage drop. Support recovery is the safest first move.'
+          : 'Ask me to investigate Acme. I will gather evidence before proposing or taking any action.';
 
   app.innerHTML = `
     <main>
@@ -101,6 +122,12 @@ function render() {
         <article><small>REVENUE AT RISK</small><strong>${formatMoney(activeAccount.arr)}</strong><span>annual contract value</span></article>
         <article><small>RENEWAL WINDOW</small><strong>${activeAccount.renewalDays} days</strong><span>before renewal</span></article>
         <article><small>RISK SIGNALS</small><strong>${activeAccount.doNotContact ? 'Protected' : '4'}</strong><span>${activeAccount.doNotContact ? 'outreach blocked' : 'across four systems'}</span></article>
+      </section>
+      <section class="agent-console">
+        <div class="console-heading"><div><p class="eyebrow">AGENT CONSOLE</p><h2>RevenueRescue at work</h2></div><span class="agent-state">● ${agentState}</span></div>
+        <div class="conversation"><div class="message user-message"><span>You</span><p>Investigate ${activeAccount.name}. Find the cause of churn risk and take only safe recovery actions.</p></div><div class="message agent-message"><span>RevenueRescue</span><p>${agentReply}</p></div></div>
+        <div class="tool-trace"><span class="trace-label">${investigated || approved || executed ? 'Evidence collected' : 'Planned tool calls'}</span>${evidence.map(([source, detail]) => `<div class="trace-item ${investigated || approved || executed ? 'trace-done' : ''}"><b>${investigated || approved || executed ? '✓' : '○'}</b><span>${source}</span><p>${detail}</p></div>`).join('')}</div>
+        <div class="console-actions">${!investigated && !activeAccount.doNotContact ? `<button id="investigate" ${investigating ? 'disabled' : ''}>${investigating ? 'Investigating…' : 'Run agent investigation'}</button>` : '<span class="agent-note">The agent never takes external actions before policy and approval checks.</span>'}</div>
       </section>
       <section class="grid">
         <article class="card account"><div class="card-title"><span>01 — ACCOUNT IN CONTEXT</span><b>${activeAccount.doNotContact ? 'POLICY TEST' : 'HIGH RISK'}</b></div><h2>${activeAccount.name}</h2><p>${activeAccount.doNotContact ? 'This account may not receive autonomous outreach.' : 'A high-value customer with converging billing, support, and adoption risk.'}</p>
@@ -126,7 +153,8 @@ function render() {
       <footer>RevenueRescue · Evidence-backed, approval-gated, idempotent recovery operations</footer>
     </main>`;
 
-  document.querySelector('#toggle').onclick = () => { activeAccount = activeAccount.doNotContact ? acme : protectedAccount; approved = false; executed = false; executionError = ''; receipts = []; render(); };
+  document.querySelector('#toggle').onclick = () => { activeAccount = activeAccount.doNotContact ? acme : protectedAccount; approved = false; executed = false; executionError = ''; receipts = []; investigated = false; render(); };
+  document.querySelector('#investigate')?.addEventListener('click', investigateAccount);
   document.querySelector('#approve')?.addEventListener('click', () => { approved = true; render(); });
   document.querySelector('#execute')?.addEventListener('click', runRecovery);
 }
