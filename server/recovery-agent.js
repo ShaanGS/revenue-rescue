@@ -39,6 +39,46 @@ const schema = {
   },
 };
 
+const permittedTools = new Set([
+  "github",
+  "slack",
+  "gmail",
+  "calendar",
+  "hubspot",
+]);
+
+export function validateRecoveryProposal(account, proposal) {
+  if (account.doNotContact || account.openLegalEscalation) {
+    if (
+      proposal.recommended_route !== "block" ||
+      proposal.action_bundle.length
+    ) {
+      throw new Error(
+        "Policy-protected account received an actionable model proposal.",
+      );
+    }
+    return proposal;
+  }
+  for (const action of proposal.action_bundle) {
+    if (!permittedTools.has(action.tool))
+      throw new Error(`Model proposed an unapproved tool: ${action.tool}`);
+    if (account.arr >= 10000 && !action.requires_approval) {
+      throw new Error(
+        "Enterprise external action was not marked for approval.",
+      );
+    }
+  }
+  if (
+    !proposal.action_bundle.length &&
+    proposal.recommended_route !== "human_review"
+  ) {
+    throw new Error(
+      "Model proposed no action bundle without escalating to human review.",
+    );
+  }
+  return proposal;
+}
+
 export async function reasonAboutRecovery(account, evidence) {
   if (!process.env.OPENAI_API_KEY)
     throw new Error("OPENAI_API_KEY is required to run the reasoning agent.");
@@ -57,9 +97,10 @@ export async function reasonAboutRecovery(account, evidence) {
       },
     },
   });
-  return {
+  const proposal = {
     model: process.env.AGENT_MODEL || "gpt-5-mini",
     responseId: response.id,
     ...JSON.parse(response.output_text),
   };
+  return validateRecoveryProposal(account, proposal);
 }
