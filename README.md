@@ -31,16 +31,16 @@ It correctly chooses a **support recovery** route: resolve the problem causing t
 
 The prototype models the exact read/write interactions below through sandbox connector adapters, using seeded data so the demo and tests are deterministic. Production OAuth/API credentials are intentionally not committed to the repository.
 
-| App | What RevenueRescue reads or writes | Role in the recovery workflow |
-| --- | --- | --- |
-| HubSpot | Account value, renewal date, owner; recovery-plan update | Customer and renewal context |
-| Stripe | Failed invoice and outstanding balance | Billing risk signal |
-| Intercom | Unresolved tickets and customer issue context | Support risk signal |
-| PostHog | Product usage trend | Adoption risk signal |
-| GitHub | Creates a P1 issue | Assigns the fix to engineering/support |
-| Slack | Posts an evidence-backed escalation | Coordinates the internal owners |
-| Gmail | Sends approved, truthful customer communication | Customer recovery outreach |
-| Google Calendar | Creates a recovery-call hold | Ensures follow-up happens |
+| App             | What RevenueRescue reads or writes                       | Role in the recovery workflow          |
+| --------------- | -------------------------------------------------------- | -------------------------------------- |
+| HubSpot         | Account value, renewal date, owner; recovery-plan update | Customer and renewal context           |
+| Stripe          | Failed invoice and outstanding balance                   | Billing risk signal                    |
+| Intercom        | Unresolved tickets and customer issue context            | Support risk signal                    |
+| PostHog         | Product usage trend                                      | Adoption risk signal                   |
+| GitHub          | Creates a P1 issue                                       | Assigns the fix to engineering/support |
+| Slack           | Posts an evidence-backed escalation                      | Coordinates the internal owners        |
+| Gmail           | Sends approved, truthful customer communication          | Customer recovery outreach             |
+| Google Calendar | Creates a recovery-call hold                             | Ensures follow-up happens              |
 
 ## How to use it
 
@@ -89,15 +89,15 @@ The route is deliberately not a fixed Zap. For example:
 
 For an agent that communicates externally, a successful API call is not enough. RevenueRescue is designed around measurable safety properties.
 
-| Reliability property | Implementation | How it is evaluated |
-| --- | --- | --- |
+| Reliability property      | Implementation                                                                | How it is evaluated                                                                    |
+| ------------------------- | ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
 | Evidence-backed decisions | Every recovery route is tied to account, billing, ticket, and usage evidence. | Acme must select the support route because open tickets explain the 62% usage decline. |
-| Policy compliance | Do-not-contact and legal-escalation accounts are blocked. | Protected-account scenario must create zero messages, meetings, or tasks. |
-| Human control | High-value/enterprise outreach pauses for approval. | Acme cannot execute the plan until the approval button is used. |
-| Correct prioritization | A deterministic route policy selects support, billing, or adoption recovery. | Policy test verifies support wins when unresolved tickets exist. |
-| Idempotency | Production writes use one operation key per account/action/run. | A retry cannot create duplicate tasks, messages, or meetings. |
-| Verified completion | Each connector action is re-read after execution. | A receipt is shown only after every destination record verifies. |
-| Fail closed | Missing evidence or failed verification prevents a false “completed” claim. | Production connector contract requires a successful `verify` response. |
+| Policy compliance         | Do-not-contact and legal-escalation accounts are blocked.                     | Protected-account scenario must create zero messages, meetings, or tasks.              |
+| Human control             | High-value/enterprise outreach pauses for approval.                           | Acme cannot execute the plan until the approval button is used.                        |
+| Correct prioritization    | A deterministic route policy selects support, billing, or adoption recovery.  | Policy test verifies support wins when unresolved tickets exist.                       |
+| Idempotency               | Production writes use one operation key per account/action/run.               | A retry cannot create duplicate tasks, messages, or meetings.                          |
+| Verified completion       | Each connector action is re-read after execution.                             | A receipt is shown only after every destination record verifies.                       |
+| Fail closed               | Missing evidence or failed verification prevents a false “completed” claim.   | Production connector contract requires a successful `verify` response.                 |
 
 Run the automated reliability tests:
 
