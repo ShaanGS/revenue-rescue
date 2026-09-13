@@ -22,6 +22,7 @@ let executed = false;
 let executing = false;
 let executionError = '';
 let integrations = null;
+let receipts = [];
 
 const evidence = [
   ['HubSpot', 'Renewal in 12 days · $18,000 ARR · owner: Maya Chen'],
@@ -65,6 +66,7 @@ async function runRecovery() {
       result = await executeRecovery(planRecovery(activeAccount, runId), createDemoConnectors(), { approved: true });
     }
     if (result.status !== 'verified') throw new Error(`Recovery run finished with status: ${result.status}`);
+    receipts = result.receipts;
     executed = true;
   } catch (error) {
     executionError = error.message;
@@ -81,6 +83,12 @@ function render() {
   const actions = route === 'support'
     ? ['Create a P1 GitHub issue for the login failure', 'Alert the CSM and Support Lead in Slack', 'Draft a truthful support update for approval', 'Create a recovery-call calendar hold', 'Update account recovery plan in HubSpot']
     : ['Open billing recovery GitHub issue', 'Alert account owner in Slack', 'Draft payment-recovery email', 'Create follow-up calendar hold', 'Update account recovery plan in HubSpot'];
+  const receiptRows = receipts.map((receipt) => {
+    const label = receipt.connector === 'github' ? 'GitHub' : receipt.connector === 'hubspot' ? 'HubSpot' : receipt.connector === 'gmail' ? 'Gmail' : receipt.connector === 'calendar' ? 'Calendar' : 'Slack';
+    const reference = receipt.url ?? receipt.id ?? receipt.ts ?? 'verified';
+    const detail = receipt.url ? `<a href="${receipt.url}" target="_blank" rel="noreferrer">Open receipt ↗</a>` : `Verified · ${reference}`;
+    return `<p><span>${label}</span><b>${detail}</b></p>`;
+  }).join('');
 
   app.innerHTML = `
     <main>
@@ -114,11 +122,11 @@ function render() {
           <div class="actions">${!approved ? '<button id="approve">Approve recovery plan</button>' : !executed ? `<button id="execute" ${executing ? 'disabled' : ''}>${executing ? 'Executing recovery workflow…' : 'Execute & verify 5 actions'}</button>` : '<button disabled>Recovery workflow verified ✓</button>'}<span>${approved ? (liveConnectorCount() === 5 ? 'Live test connectors enabled.' : 'Sandbox mode: no external action has been taken.') : 'No external action has been taken.'}</span></div>
           ${executionError ? `<p class="error">Execution stopped safely: ${executionError}</p>` : ''}`}
       </section>
-      ${executed ? `<section class="receipt"><div><p class="eyebrow">VERIFIED RECEIPT</p><h2>Five actions completed.<br><em>Five receipts attached.</em></h2></div><div class="receipt-list"><p>GitHub <b>issue created</b></p><p>Slack <b>#acme-recovery notified</b></p><p>Gmail <b>draft approved & sent</b></p><p>Calendar <b>recovery hold created</b></p><p>HubSpot <b>recovery plan updated</b></p></div></section>` : ''}
+      ${executed ? `<section class="receipt"><div><p class="eyebrow">VERIFIED RECEIPT</p><h2>Five actions completed.<br><em>Five receipts attached.</em></h2><p class="receipt-note">Each external record was re-read before this receipt was issued.</p></div><div class="receipt-list">${receiptRows}</div></section>` : ''}
       <footer>RevenueRescue · Evidence-backed, approval-gated, idempotent recovery operations</footer>
     </main>`;
 
-  document.querySelector('#toggle').onclick = () => { activeAccount = activeAccount.doNotContact ? acme : protectedAccount; approved = false; executed = false; executionError = ''; render(); };
+  document.querySelector('#toggle').onclick = () => { activeAccount = activeAccount.doNotContact ? acme : protectedAccount; approved = false; executed = false; executionError = ''; receipts = []; render(); };
   document.querySelector('#approve')?.addEventListener('click', () => { approved = true; render(); });
   document.querySelector('#execute')?.addEventListener('click', runRecovery);
 }

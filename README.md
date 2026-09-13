@@ -159,7 +159,7 @@ Every live action is first recorded in `.revenuerescue/operations.json` (which i
 
 ## Demo video script
 
-The submission video should show this exact sequence in under two minutes:
+The complete recording script and checklist are in [`demo/VIDEO_SCRIPT.md`](demo/VIDEO_SCRIPT.md). The video should show this exact sequence in under two minutes:
 
 1. **0:00–0:12** — Introduce the $18k renewal risk and the fragmented signals.
 2. **0:12–0:32** — Show evidence being joined from four source apps.
